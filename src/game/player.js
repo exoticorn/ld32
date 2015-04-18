@@ -9,10 +9,11 @@ export default class Player {
         this.nextMovement = M.vec2.clone([0, 0]);
         this.facesRight = true;
         this.shotTimer = 0;
+        this.jump = false;
     }
     
     update(ctx) {
-        M.vec2.copy(this.movement, this.nextMovement);
+        this.movement[0] = this.nextMovement[0];
         M.vec2.set(this.nextMovement, 0, 0);
         if(ctx.keyboard.isPressed(Keyboard.LEFT)) {
             this.movement[0] = -1;
@@ -22,20 +23,20 @@ export default class Player {
             this.movement[0] = 1;
             this.facesRight = true;
         }
-        if(ctx.keyboard.isPressed(Keyboard.UP)) {
-            this.movement[1] = -1;
-        }
-        if(ctx.keyboard.isPressed(Keyboard.DOWN)) {
-            this.movement[1] = 1;
-        }
         this.shotTimer -= ctx.timeStep;
-        if(ctx.keyboard.isTriggered(Keyboard.A) && this.shotTimer < 0) {
-            let x = this.pos[0] + (this.facesRight ? 12 / 16 : 0);
+        if(ctx.keyboard.isTriggered(Keyboard.S) && this.shotTimer < 0) {
+            let x = this.pos[0] + (this.facesRight ? 10 / 16 : 2 / 16);
             let y = this.pos[1] + 6 / 16;
             ctx.game.addObject(new Shot(x, y, this.facesRight ? 1 : -1));
             this.shotTimer = 0.2;
         }
 
+        if(this.jump && !ctx.keyboard.isPressed(Keyboard.A)) {
+            this.movement[1] = this.movement[1] * 0.8 + 0.5;
+            this.jump = false;
+        }
+
+        this.movement[1] += ctx.timeStep * 2;
         this.pos[0] += this.movement[0] * ctx.timeStep * (60 / 16);
         if(this.movement[0] !== 0) {
             let cx = this.movement[0] < 0 ? this.pos[0] - 1/16 : this.pos[0] + 13/16;
@@ -57,6 +58,7 @@ export default class Player {
             }
         }
         this.pos[1] += this.movement[1] * ctx.timeStep * (60 / 16);
+        let isOnGround = false;
         if(this.movement[1] !== 0) {
             let cx = this.pos[0] + 6/16;
             let cy = this.movement[1] < 0 ? this.pos[1] - 1/16 : this.pos[1] + 13/16;
@@ -68,12 +70,21 @@ export default class Player {
                     this.pos[1] = Math.ceil(cy) + 1/16;
                 } else {
                     this.pos[1] = Math.floor(cy) - 13/16;
+                    isOnGround = true;
                 }
+                this.movement[1] = 0;
             }
             if(left && !center) {
                 this.nextMovement[0] = 1;
             } else if(right && !center) {
                 this.nextMovement[0] = -1;
+            }
+        }
+        if(isOnGround) {
+            this.jump = false;
+            if(ctx.keyboard.isPressed(Keyboard.A)) {
+                this.movement[1] = -1.6;
+                this.jump = true;
             }
         }
     }
