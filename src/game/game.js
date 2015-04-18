@@ -27,6 +27,7 @@ export default function* Game(gl, frameworkShaders) {
     let time = 0;
     
     this.update = function(ctx) {
+        ctx.level = level;
         player.update(ctx);
         time += ctx.timeStep;
     };

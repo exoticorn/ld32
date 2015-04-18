@@ -21,6 +21,19 @@ export default class Level {
             }
         }
     }
+    testCollision(x, y) {
+        x = Math.floor(x);
+        y = Math.floor(y);
+        if(y < 0 || y >= this.data.length) {
+            return true;
+        }
+        let line = this.data[y];
+        if(x < 0 || x >= line.length) {
+            return true;
+        }
+        let tile = line[x];
+        return tile === '#';
+    }
 }
 
 Level.loadData = async(function*() {
