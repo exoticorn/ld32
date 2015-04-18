@@ -11,11 +11,10 @@ export default class Shot {
         this.pos[0] += this.sx * ctx.timeStep * 120 / 16;
         let x = Math.floor(this.pos[0]);
         if(x != this.lastX) {
-            if(ctx.level.testCollision(x, this.pos[1])) {
+            if(ctx.level.testCollision(this.pos[0], this.pos[1])) {
                 this.deleteMe = true;
-            } else {
-                ctx.level.destroyTile(x, Math.floor(this.pos[1]));
             }
+            ctx.level.destroyTile(x, Math.floor(this.pos[1]));
             this.lastX = x;
         }
     }

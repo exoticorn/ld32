@@ -33,7 +33,7 @@ export default class Player {
             let x = this.pos[0] + (this.facesRight ? 12 / 16 : 0);
             let y = this.pos[1] + 6 / 16;
             ctx.game.addObject(new Shot(x, y, this.facesRight ? 1 : -1));
-            this.shotTimer = 0.5;
+            this.shotTimer = 0.2;
         }
 
         this.pos[0] += this.movement[0] * ctx.timeStep * (60 / 16);

@@ -11,6 +11,13 @@ let tileMapping = {
 export default class Level {
     constructor(data) {
         this.data = data;
+        for(let line of data) {
+            for(let x = 0; x < line.length; ++x) {
+                if(line[x] === ' ' && Math.random() < 0.3) {
+                    line[x] = '#';
+                }
+            }
+        }
         this.anim = [];
         for(let x = 0; x < data[0].length; ++x) {
             this.anim.push({ y: 0, o: 0, s: 0 });
@@ -65,12 +72,20 @@ export default class Level {
         return '#';
     }
     destroyTile(x, y) {
+        if(x < 0 || x >= this.anim.length) {
+            return;
+        }
         this.anim[x].y = y;
-        this.anim[x].o = 1;
-        while(y >= 0) {
+        this.anim[x].o += 1;
+        let destroyedTile = this.get(x, y);
+        while(y > 0) {
             this.data[y][x] = this.get(x, y-1);
             y -=1;
         }
+        if(destroyedTile !== 'E') {
+            destroyedTile = Math.random() < 0.3 ? '#' : ' ';
+        }
+        this.data[y][x] = destroyedTile;
     }
 }
 
