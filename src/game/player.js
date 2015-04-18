@@ -1,25 +1,39 @@
 import M from '../3rd-party/gl-matrix-min';
 import Keyboard from '../framework/keyboard';
+import Shot from './shot';
 
-export default function Player(gl) {
-    this.pos = M.vec2.clone([1 + 1/8, 1 + 1/8]);
-    this.movement = M.vec2.clone([0, 0]);
-    this.nextMovement = M.vec2.clone([0, 0]);
+export default class Player {
+    constructor(gl) {
+        this.pos = M.vec2.clone([1 + 1/8, 1 + 1/8]);
+        this.movement = M.vec2.clone([0, 0]);
+        this.nextMovement = M.vec2.clone([0, 0]);
+        this.facesRight = true;
+        this.shotTimer = 0;
+    }
     
-    this.update = function(ctx) {
+    update(ctx) {
         M.vec2.copy(this.movement, this.nextMovement);
         M.vec2.set(this.nextMovement, 0, 0);
         if(ctx.keyboard.isPressed(Keyboard.LEFT)) {
             this.movement[0] = -1;
+            this.facesRight = false;
         }
         if(ctx.keyboard.isPressed(Keyboard.RIGHT)) {
             this.movement[0] = 1;
+            this.facesRight = true;
         }
         if(ctx.keyboard.isPressed(Keyboard.UP)) {
             this.movement[1] = -1;
         }
         if(ctx.keyboard.isPressed(Keyboard.DOWN)) {
             this.movement[1] = 1;
+        }
+        this.shotTimer -= ctx.timeStep;
+        if(ctx.keyboard.isTriggered(Keyboard.A) && this.shotTimer < 0) {
+            let x = this.pos[0] + (this.facesRight ? 12 / 16 : 0);
+            let y = this.pos[1] + 6 / 16;
+            ctx.game.addObject(new Shot(x, y, this.facesRight ? 1 : -1));
+            this.shotTimer = 0.5;
         }
 
         this.pos[0] += this.movement[0] * ctx.timeStep * (60 / 16);
@@ -62,9 +76,9 @@ export default function Player(gl) {
                 this.nextMovement[0] = -1;
             }
         }
-    };
+    }
     
-    this.render = function(renderer, texture) {
-        renderer.draw(this.pos[0] * 16, this.pos[1] * 16, texture, 1, 1, 1, 1);
-    };
+    render(renderer, gfx) {
+        renderer.draw(this.pos[0] * 16, this.pos[1] * 16, gfx[this.facesRight ? 'hero_right' : 'hero_left'], 1, 1, 1, 1);
+    }
 };

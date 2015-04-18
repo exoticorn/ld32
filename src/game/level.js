@@ -2,6 +2,8 @@ import io from '../framework/io';
 import async from '../framework/async';
 
 let tileMapping = {
+    ' ': 'ground',
+    'S': 'ground',
     '#': 'block',
     'E': 'exit'
 };
@@ -9,6 +11,20 @@ let tileMapping = {
 export default class Level {
     constructor(data) {
         this.data = data;
+        this.anim = [];
+        for(let x = 0; x < data[0].length; ++x) {
+            this.anim.push({ y: 0, o: 0, s: 0 });
+        }
+    }
+    update(ctx) {
+        for(let a of this.anim) {
+            a.s -= ctx.timeStep * 6;
+            a.o += a.s * ctx.timeStep;
+            if(a.o < 0) {
+                a.o = 0;
+                a.s *= -0.3;
+            }
+        }
     }
     render(renderer, tiles) {
         for(let y = 0; y < this.data.length; ++y) {
@@ -16,7 +32,12 @@ export default class Level {
             for(let x = 0; x < line.length; ++x) {
                 let name = tileMapping[line[x]];
                 if(name !== undefined) {
-                    renderer.draw(x * 16, y * 16, tiles[name])
+                    let ay = y;
+                    let a = this.anim[x];
+                    if(y <= a.y) {
+                        ay -= a.o;
+                    }
+                    renderer.draw(x * 16, ay * 16, tiles[name])
                 }
             }
         }
@@ -33,6 +54,23 @@ export default class Level {
         }
         let tile = line[x];
         return tile === '#';
+    }
+    get(x, y) {
+        x = Math.floor(x);
+        y = Math.floor(y);
+        let line = this.data[y];
+        if(line) {
+            return line[x] || '#'
+        }
+        return '#';
+    }
+    destroyTile(x, y) {
+        this.anim[x].y = y;
+        this.anim[x].o = 1;
+        while(y >= 0) {
+            this.data[y][x] = this.get(x, y-1);
+            y -=1;
+        }
     }
 }
 

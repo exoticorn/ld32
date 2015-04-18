@@ -12,9 +12,12 @@ export default function* Game(gl, frameworkShaders) {
     let tiles = yield resourceManager.load(TxtGfx, 'src/game/tiles.txt');
     let shaders = yield Shaders.load(gl, 'src/game/shaders.glsl');
     let vscreen = new VirtualScreen(gl, 320, 160, shaders);
-    let player = new Player(gl);
     let levels = yield Level.loadData();
     let level = new Level(levels[0]);
+
+    let objects = [];
+    let player = new Player(gl);
+    objects.push(player);
     
     gl.clearColor(0, 0, 0.1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -28,7 +31,16 @@ export default function* Game(gl, frameworkShaders) {
     
     this.update = function(ctx) {
         ctx.level = level;
-        player.update(ctx);
+        ctx.game = this;
+        let needsDeletion = false;
+        for(let obj of objects) {
+            obj.update(ctx);
+            needsDeletion = needsDeletion || obj.deleteMe;
+        }
+        if(needsDeletion) {
+            objects = objects.filter(obj => !obj.deleteMe);
+        }
+        level.update(ctx);
         time += ctx.timeStep;
     };
     
@@ -40,11 +52,17 @@ export default function* Game(gl, frameworkShaders) {
         spriteRenderer.begin(vscreen);
 
         level.render(spriteRenderer, tiles);
-        player.render(spriteRenderer, gfx.hero);
+        for(let obj of objects) {
+            obj.render(spriteRenderer, gfx);
+        }
 
         spriteRenderer.end();
 
         vscreen.end();
+    };
+
+    this.addObject = function(obj) {
+        objects.push(obj);
     };
 
     return this;
