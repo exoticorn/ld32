@@ -4,15 +4,19 @@ import TxtGfx from '../framework/txtgfx';
 import Shaders from '../framework/shaders';
 import Player from './player';
 import VirtualScreen from './virtualscreen';
+import Level from './level';
 
 export default function* Game(gl, frameworkShaders) {
     let resourceManager = new ResourceManager(gl);
     let gfx = yield resourceManager.load(TxtGfx, 'src/game/gfx.txt');
+    let tiles = yield resourceManager.load(TxtGfx, 'src/game/tiles.txt');
     let shaders = yield Shaders.load(gl, 'src/game/shaders.glsl');
-    let vscreen = new VirtualScreen(gl, 320, 200, shaders);
+    let vscreen = new VirtualScreen(gl, 320, 160, shaders);
     let player = new Player(gl);
+    let levels = yield Level.loadData();
+    let level = new Level(levels[0]);
     
-    gl.clearColor(0, 0, 0.5, 1);
+    gl.clearColor(0, 0, 0.1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.enable(gl.BLEND);
     gl.blendEquation(gl.FUNC_ADD);
@@ -34,8 +38,7 @@ export default function* Game(gl, frameworkShaders) {
         
         spriteRenderer.begin(vscreen);
 
-        spriteRenderer.drawPlain(4, 150, 140, 30, 1, 0, 1, 1);
-        spriteRenderer.draw(0, 0, gfx.hero);
+        level.render(spriteRenderer, tiles);
         player.render(spriteRenderer, gfx.hero);
 
         spriteRenderer.end();
