@@ -5,6 +5,7 @@ import Shaders from '../framework/shaders';
 import Player from './player';
 import VirtualScreen from './virtualscreen';
 import Level from './level';
+import Enemy from './enemy';
 
 export default function* Game(gl, frameworkShaders) {
     let resourceManager = new ResourceManager(gl);
@@ -18,6 +19,7 @@ export default function* Game(gl, frameworkShaders) {
     let objects = [];
     let player = new Player(gl);
     objects.push(player);
+    let timeToGhost = 0;
     
     gl.clearColor(0, 0, 0.1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -31,7 +33,14 @@ export default function* Game(gl, frameworkShaders) {
     
     this.update = function(ctx) {
         ctx.level = level;
+        ctx.player = player;
         ctx.game = this;
+        ctx.objects = objects;
+        timeToGhost -= ctx.timeStep;
+        if(timeToGhost < 0) {
+            objects.push(new Enemy(Math.random() < 0.5 ? -1 : 20, Math.random() * 10));
+            timeToGhost += 10;
+        }
         let needsDeletion = false;
         for(let obj of objects) {
             obj.update(ctx);

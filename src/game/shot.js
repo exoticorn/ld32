@@ -9,6 +9,13 @@ export default class Shot {
 
     update(ctx) {
         this.pos[0] += this.sx * ctx.timeStep * 120 / 16;
+
+        for(let obj of ctx.objects) {
+            if(obj.testHit && obj.testHit(this.pos[0], this.pos[1])) {
+                this.deleteMe = true;
+            }
+        }
+
         let x = Math.floor(this.pos[0]);
         if(x != this.lastX) {
             if(ctx.level.testCollision(this.pos[0], this.pos[1])) {

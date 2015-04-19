@@ -2,9 +2,12 @@ import M from '../3rd-party/gl-matrix-min';
 import Keyboard from '../framework/keyboard';
 import Shot from './shot';
 
+let width = 6/16;
+let height = 8/16;
+
 export default class Player {
     constructor(gl) {
-        this.pos = M.vec2.clone([1 + 1/8, 1 + 1/8]);
+        this.pos = M.vec2.clone([10 + 1/8, 7 + 1/8]);
         this.movement = M.vec2.clone([0, 0]);
         this.nextMovement = M.vec2.clone([0, 0]);
         this.facesRight = true;
@@ -25,8 +28,8 @@ export default class Player {
         }
         this.shotTimer -= ctx.timeStep;
         if(ctx.keyboard.isTriggered(Keyboard.S) && this.shotTimer < 0) {
-            let x = this.pos[0] + (this.facesRight ? 10 / 16 : 2 / 16);
-            let y = this.pos[1] + 6 / 16;
+            let x = this.pos[0] + (this.facesRight ? width : 0);
+            let y = this.pos[1] + width/2;
             ctx.game.addObject(new Shot(x, y, this.facesRight ? 1 : -1));
             this.shotTimer = 0.2;
         }
@@ -39,16 +42,16 @@ export default class Player {
         this.movement[1] += ctx.timeStep * 2;
         this.pos[0] += this.movement[0] * ctx.timeStep * (60 / 16);
         if(this.movement[0] !== 0) {
-            let cx = this.movement[0] < 0 ? this.pos[0] - 1/16 : this.pos[0] + 13/16;
-            let cy = this.pos[1] + 6/16;
-            let top = ctx.level.testCollision(cx, cy - 6/16);
-            let bottom = ctx.level.testCollision(cx, cy + 6/16);
+            let cx = this.movement[0] < 0 ? this.pos[0] - 1/16 : this.pos[0] + width + 1/16;
+            let cy = this.pos[1] + height/2;
+            let top = ctx.level.testCollision(cx, cy - height/2);
+            let bottom = ctx.level.testCollision(cx, cy + height/2);
             let center = ctx.level.testCollision(cx, cy);
             if(top || bottom || center) {
                 if(this.movement[0] < 0) {
                     this.pos[0] = Math.ceil(cx) + 1/16;
                 } else {
-                    this.pos[0] = Math.floor(cx) - 13/16;
+                    this.pos[0] = Math.floor(cx) - (width + 1/16);
                 }
             }
             if(top && !center) {
@@ -60,16 +63,16 @@ export default class Player {
         this.pos[1] += this.movement[1] * ctx.timeStep * (60 / 16);
         let isOnGround = false;
         if(this.movement[1] !== 0) {
-            let cx = this.pos[0] + 6/16;
-            let cy = this.movement[1] < 0 ? this.pos[1] - 1/16 : this.pos[1] + 13/16;
-            let left = ctx.level.testCollision(cx - 6/16, cy);
-            let right = ctx.level.testCollision(cx + 6/16, cy);
+            let cx = this.pos[0] + width/2;
+            let cy = this.movement[1] < 0 ? this.pos[1] - 1/16 : this.pos[1] + height + 1/16;
+            let left = ctx.level.testCollision(cx - width/2, cy);
+            let right = ctx.level.testCollision(cx + width/2, cy);
             let center = ctx.level.testCollision(cx, cy);
             if(left || right || center) {
                 if(this.movement[1] < 0) {
                     this.pos[1] = Math.ceil(cy) + 1/16;
                 } else {
-                    this.pos[1] = Math.floor(cy) - 13/16;
+                    this.pos[1] = Math.floor(cy) - (height + 1/16);
                     isOnGround = true;
                 }
                 this.movement[1] = 0;

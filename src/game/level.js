@@ -13,7 +13,7 @@ export default class Level {
         this.data = data;
         for(let line of data) {
             for(let x = 0; x < line.length; ++x) {
-                if(line[x] === ' ' && Math.random() < 0.3) {
+                if(line[x] === ' ' && Math.random() < 0.2) {
                     line[x] = '#';
                 }
             }
@@ -83,7 +83,7 @@ export default class Level {
             y -=1;
         }
         if(destroyedTile !== 'E') {
-            destroyedTile = Math.random() < 0.3 ? '#' : ' ';
+            destroyedTile = Math.random() < 0.2 ? '#' : ' ';
         }
         this.data[y][x] = destroyedTile;
     }
